@@ -1,0 +1,26 @@
+version: "2"
+services:
+  web:
+    build: https://github.com/kunimitaiyoh/sample-hyperapp.git
+    command: ["nginx", "-g", "daemon off;"]
+    ports:
+      - 80:80
+  rest:
+    build: https://github.com/kunimitaiyoh/sample-dropwizard.git
+    command: bash -c "java -jar target/sample.jar db migrate config.test.yaml && java -jar target/sample.jar server config.test.yaml"
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+    volumes:
+      - ./temp/log/sample:/var/log/sample
+  db:
+    image: mysql:5.7
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sample
+    volumes:
+      - ./temp/db:/var/lib/mysql
